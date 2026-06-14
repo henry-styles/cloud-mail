@@ -8,10 +8,19 @@ on:
       - "mail-vue/**"
   workflow_dispatch:
 
+# 🆕 全局环境变量：强制 JS Actions 使用 Node.js 24，解决弃用警告
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 jobs:
   Deploy-cloud-mail:
     name: 🏗️ Build and Deploy
     runs-on: ubuntu-latest
+
+    # 🆕 授予删除 workflow 运行记录所需权限
+    permissions:
+      actions: write
+      contents: read
 
     env:
       NAME: ${{ secrets.NAME || vars.NAME || 'cloud-mail' }}
@@ -263,9 +272,12 @@ jobs:
             exit 1
           fi
 
+      # 🔄 替换为社区活跃维护的 Action（原 GitRML/delete-workflow-runs 已停止维护）
       - name: 🗑️ 删除运行记录 / Delete workflow runs
-        uses: GitRML/delete-workflow-runs@main
+        uses: Mattraks/delete-workflow-runs@v2
         continue-on-error: true
         with:
-          retain_days: '1'
-          keep_minimum_runs: '0'
+          token: ${{ github.token }}
+          repository: ${{ github.repository }}
+          retain_days: 1
+          keep_minimum_runs: 0
